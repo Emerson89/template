@@ -1,0 +1,83 @@
+---
+- name: Install boto3 e pyzabbix
+  pip:
+    name:
+      - boto3
+      - pyzabbix
+
+- name: Get authentication token Zabbix
+  uri:
+    url: '{{ url_zabbix_api }}'
+    body_format: json
+    headers:
+      Content-type: application/json
+    body: 
+      jsonrpc: "2.0"
+      method: user.login
+      id: 1
+      auth: null
+      params: 
+        user: 'Admin'
+        password: '{{ pass_admin }}'
+    return_content: yes
+  register: auth
+  tags: zabbix-template
+  
+- debug:
+    msg: '{{ auth | json_query("json.result") }}'
+
+- name: Create Template Mandic
+  uri:
+    url: '{{ url_zabbix_api }}'
+    body_format: json
+    headers:
+      Content-type: application/json
+    body: 
+      jsonrpc: "2.0"
+      method: configuration.import
+      id: 1
+      auth: '{{ auth | json_query("json.result")}}'
+      params:
+        format: "xml"
+        rules:
+            hosts:
+              createMissing: True
+              updateExisting: True
+            items:
+              createMissing: True
+              updateExisting: True
+            templates:
+              createMissing: True
+              updateExisting: True
+            applications:
+              createMissing: True
+            discoveryRules:
+              createMissing: True
+              updateExisting: True
+            graphs:
+              createMissing: True
+              updateExisting: True
+            groups:
+              createMissing: True
+            screens:
+              createMissing: True
+              updateExisting: True
+            triggers:
+              createMissing: True
+              updateExisting: True
+            images:
+              createMissing: True
+              updateExisting: True
+            maps:
+              createMissing: True
+              updateExisting: True
+            templateLinkage:
+              createMissing: True
+        source:  "{{  lookup('file', item)  }}"
+  return_content: yes
+  register: template_id
+  loop: "{{ lookup('fileglob', 'templates/template*.xml', wantlist=True) }}"
+  tags: zabbix-template
+
+  # - debug:
+  #       msg: '{{ template_id.json }}'

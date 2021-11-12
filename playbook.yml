@@ -1,0 +1,9 @@
+---
+- hosts: all
+  vars:
+    url_zabbix_api: "http://localhost/api_jsonrpc.php"
+    user_zabbix: "Admin"
+    pass_admin: zabbix
+  become: yes
+  roles:
+    - zabbix-template

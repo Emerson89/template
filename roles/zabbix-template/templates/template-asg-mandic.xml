@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-08-28T21:01:38Z</date>
+    <groups>
+        <group>
+            <name>ASG</name>
+        </group>
+        <group>
+            <name>AWS</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template ASG - Mandic</template>
+            <name>Template ASG - Mandic</name>
+            <groups>
+                <group>
+                    <name>ASG</name>
+                </group>
+                <group>
+                    <name>AWS</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>CPU</name>
+                </application>
+                <application>
+                    <name>DesiredCapacity</name>
+                </application>
+                <application>
+                    <name>Disk</name>
+                </application>
+                <application>
+                    <name>InservicesInstance</name>
+                </application>
+                <application>
+                    <name>Maximo Instances</name>
+                </application>
+                <application>
+                    <name>Minimo Instances</name>
+                </application>
+                <application>
+                    <name>Network</name>
+                </application>
+                <application>
+                    <name>Total Instances</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discovery ASG</name>
+                    <type>EXTERNAL</type>
+                    <key>asg-discovery.py[{$REGION}]</key>
+                    <lifetime>1d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>GroupDesiredCapacity {#ASGN}</name>
+                            <type>EXTERNAL</type>
+                            <key>cloudwatch-zabbix.py[&quot;GroupDesiredCapacity&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;]</key>
+                            <value_type>FLOAT</value_type>
+                            <applications>
+                                <application>
+                                    <name>DesiredCapacity</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>GroupInServiceInstances {#ASGN}</name>
+                            <type>EXTERNAL</type>
+                            <key>cloudwatch-zabbix.py[&quot;GroupInServiceInstances&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;]</key>
+                            <value_type>FLOAT</value_type>
+                            <applications>
+                                <application>
+                                    <name>InservicesInstance</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>GroupMaxSize {#ASGN}</name>
+                            <type>EXTERNAL</type>
+                            <key>cloudwatch-zabbix.py[&quot;GroupMaxSize&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;]</key>
+                            <value_type>FLOAT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Maximo Instances</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>GroupMinSize {#ASGN}</name>
+                            <type>EXTERNAL</type>
+                            <key>cloudwatch-zabbix.py[&quot;GroupMinSize&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;]</key>
+                            <value_type>FLOAT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Minimo Instances</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupMaxSize&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}&lt;&gt;{Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupMinSize&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()} and  {Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupMaxSize&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()} = {Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupInServiceInstances&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}</expression>
+                            <name>ASG - {#ASGN} - Atingiu o máximo de instancias</name>
+                            <priority>DISASTER</priority>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupInServiceInstances&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}=0 and {Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupDesiredCapacity&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}&gt;0.9</expression>
+                            <name>ASG - {#ASGN} - Sem instancias rodando</name>
+                            <priority>DISASTER</priority>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupDesiredCapacity&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}&gt;{Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupInServiceInstances&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}</expression>
+                            <name>ASG - {#ASGN} scale down</name>
+                            <priority>HIGH</priority>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupDesiredCapacity&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}&lt;{Template ASG - Mandic:cloudwatch-zabbix.py[&quot;GroupInServiceInstances&quot;,&quot;Average&quot;,&quot;AutoScalingGroupName&quot;,&quot;{#ASGN}&quot;,&quot;AWS/AutoScaling&quot;,&quot;{$REGION}&quot;].last()}</expression>
+                            <name>ASG - {#ASGN} scale up</name>
+                            <priority>HIGH</priority>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+</zabbix_export>
